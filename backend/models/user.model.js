@@ -31,7 +31,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["male", "female", "other"],
     required: true,
-  }
+  },
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  friendRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 },
   {timestamps: true}
 );

@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const friendRequestSchema = new mongoose.Schema({
+const friendRequestSchema = new Schema({
     sender: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     recipient: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -25,4 +25,4 @@ const friendRequestSchema = new mongoose.Schema({
 // Prevent duplicate friend requests
 friendRequestSchema.index({ sender: 1, recipient: 1 }, { unique: true });
 
-module.exports = mongoose.model('FriendRequest', friendRequestSchema);
+export default model('FriendRequest', friendRequestSchema);
