@@ -18,6 +18,10 @@ const messageSchema = new Schema({
     readBy: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
+    }],
+    attachments: [{
+        type: String,
+        required: false
     }]
 }, {
     timestamps: true
