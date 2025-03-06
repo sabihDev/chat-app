@@ -18,7 +18,7 @@ app.use(cors({origin:"*"}));
 // importing port from env variables
 const PORT = process.env.PORT || 3000;
 
-app.use("/user", userRoutes);
+app.use("/api/user", userRoutes);
 
 app.listen(PORT,(req, res)=>{
     console.log("Server is runing at PORT: " + PORT);
