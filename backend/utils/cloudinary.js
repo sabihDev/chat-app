@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-
-require('dotenv').config();
+import dotenv from dotenv;
+dotenv.config();
 
 // Cloudinary configuration
 cloudinary.config({
@@ -12,12 +12,15 @@ cloudinary.config({
 // Upload single file
 const uploadToCloudinary = async (fileString) => {
     try {
+        if (!fileString) throw new Error('Invalid file input');
+
         const uploadResponse = await cloudinary.uploader.upload(fileString, {
             upload_preset: 'chat_app'
         });
+
         return uploadResponse;
     } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
+        console.error('Error uploading to Cloudinary:', error.message);
         throw error;
     }
 };
@@ -25,18 +28,22 @@ const uploadToCloudinary = async (fileString) => {
 // Upload multiple files
 const uploadMultipleToCloudinary = async (fileStringArray) => {
     try {
-        const uploadPromises = fileStringArray.map(fileString => 
+        if (!Array.isArray(fileStringArray) || fileStringArray.length === 0) {
+            throw new Error('Invalid file input array');
+        }
+
+        const uploadPromises = fileStringArray.map(fileString =>
             cloudinary.uploader.upload(fileString, {
                 upload_preset: 'chat_app'
             })
         );
-        
+
         const uploadResponses = await Promise.all(uploadPromises);
         return uploadResponses;
     } catch (error) {
-        console.error('Error uploading multiple files to Cloudinary:', error);
+        console.error('Error uploading multiple files to Cloudinary:', error.message);
         throw error;
     }
 };
 
-export default { uploadToCloudinary, uploadMultipleToCloudinary };
+export { uploadToCloudinary, uploadMultipleToCloudinary };
