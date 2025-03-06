@@ -5,6 +5,7 @@ import cors from "cors";
 import multer from "multer";
 import cloudinary from "cloudinary"
 import EstalishConnectionToDB from "./utils/connectToDB.js";
+import { userRoutes } from "./routes/user.routes.js";
 
 // initialize config file
 dotenv.config();
@@ -16,6 +17,8 @@ app.use(cors({origin:"*"}));
 
 // importing port from env variables
 const PORT = process.env.PORT || 3000;
+
+app.use("/user", userRoutes);
 
 app.listen(PORT,(req, res)=>{
     console.log("Server is runing at PORT: " + PORT);
