@@ -126,17 +126,75 @@ export const friendRequest = async (req, res) => {
             return res.status(400).json({ error: "Friend request already exists." });
         }
 
-        // Send friend request
+        // Fix: Push only ObjectId, not an object
         recipient.friendRequests.push(senderId);
         await recipient.save();
 
         const newFriendRequest = new FriendRequest({ sender: senderId, recipient: userId });
         await newFriendRequest.save();
 
-        return res.status(200).json({ message: "Friend request sent successfully." });
+        return res.status(200).json({ message: "Friend request sent successfully.", newFriendRequest });
 
     } catch (error) {
         console.log("Error in friendRequest controller: ", error.message);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+export const friendRequestResponse = async (req, res) => {
+    try {
+        const RequestSender = req.user.userId;
+        const RequestReciever = req.query.userId;
+        const RequestResponse = req.body.response;
+
+        console.log("sender: ", RequestSender);
+        console.log("RequestReciever: ", RequestReciever);
+        console.log("RequestResponse: ", RequestResponse);
+        
+
+        // Fetch users
+        const RequestRecieverUser = await User.findById(RequestReciever);
+        const RequestSenderUser = await User.findById(RequestSender);
+
+        if (!RequestRecieverUser || !RequestSenderUser) {
+            return res.status(400).json({ error: true, message: "User does not exist" });
+        }
+
+        // Check if friend request exists
+        const isFriendRequestExist = await FriendRequest.findOne({ sender: RequestSender, recipient: RequestReciever });
+
+        if (!isFriendRequestExist) {
+            return res.status(400).json({ error: true, message: "This request does not exist" });
+        }
+
+        if (RequestResponse === "rejected") {
+            // Remove friend request from receiver
+            await RequestRecieverUser.updateOne({ $pull: { friendRequests: RequestSender } });
+
+            // Delete friend request document
+            await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReciever });
+
+            return res.status(200).json({ error: false, message: "Request rejected", user: { username: RequestRecieverUser.username } });
+        }
+
+        // Accepting friend request
+        await RequestRecieverUser.updateOne({
+            $pull: { friendRequests: RequestSender },
+            $push: { friends: RequestSender }
+        });
+
+        await RequestSenderUser.updateOne({
+            $push: { friends: RequestReciever }
+        });
+
+        // Update friend request status
+        await FriendRequest.updateOne({ sender: RequestSender, recipient: RequestReciever }, { status: "accepted" });
+
+        return res.status(200).json({ error: false, message: "Request accepted", user: { username: RequestRecieverUser.username } });
+
+    } catch (error) {
+        console.log("Error in friendRequestResponse:", error.message);
+        res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
