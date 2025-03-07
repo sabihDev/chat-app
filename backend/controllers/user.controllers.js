@@ -141,17 +141,11 @@ export const friendRequest = async (req, res) => {
     }
 };
 
-
 export const friendRequestResponse = async (req, res) => {
     try {
         const RequestSender = req.user.userId;
         const RequestReciever = req.query.userId;
-        const RequestResponse = req.body.response;
-
-        console.log("sender: ", RequestSender);
-        console.log("RequestReciever: ", RequestReciever);
-        console.log("RequestResponse: ", RequestResponse);
-        
+        const RequestResponse = req.body.response;        
 
         // Fetch users
         const RequestRecieverUser = await User.findById(RequestReciever);
@@ -198,3 +192,32 @@ export const friendRequestResponse = async (req, res) => {
         res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
+
+export const findNewUserByQuery = async (req,res) =>{
+    try {
+        const { query } = req.query;
+        const myId = req.user.userId;
+
+        if (!query) {
+            return res.status(400).json({ error: "Search query is required" });
+        }
+
+        const users = await User.find({
+            $and: [
+                {
+                    $or: [
+                        { username: { $regex: query, $options: "i" } },
+                        { fullName: { $regex: query, $options: "i" } }
+                    ]
+                },
+                { _id: { $ne: myId } }
+            ]
+        }).select("username fullName profilePic");
+
+        res.status(200).json(users);
+
+    } catch (error) {
+        console.log("Error in findNewUserByQuery controller:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
