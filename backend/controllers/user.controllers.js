@@ -147,7 +147,7 @@ export const friendRequestResponse = async (req, res) => {
     try {
         const RequestSender = req.user.userId;
         const RequestReciever = req.query.userId;
-        const RequestResponse = req.body.response;        
+        const RequestResponse = req.body.response;
 
         // Fetch users
         const RequestRecieverUser = await User.findById(RequestReciever);
@@ -195,7 +195,7 @@ export const friendRequestResponse = async (req, res) => {
     }
 };
 
-export const findNewUserByQuery = async (req,res) =>{
+export const findNewUserByQuery = async (req, res) => {
     try {
         const { query } = req.query;
         const myId = req.user.userId;
@@ -223,3 +223,29 @@ export const findNewUserByQuery = async (req,res) =>{
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+export const getUserDetails = async (req, res) => {
+    try {
+        // Ensure user is authenticated
+        if (!req.user || !req.user.userId) {
+            return res.status(401).json({ error: "Unauthorized: No user data found in token" });
+        }
+
+        const userId = req.user.userId; // Get userId from JWT token
+
+        const user = await User.findById(userId)
+            .select("-password") // Exclude password
+            .populate("friends", "username fullName profilePic"); // Populate friends array
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // ✅ Ensure response contains `data`
+        res.status(200).json({ data: user });
+
+    } catch (error) {
+        console.error("Error in getUserDetails controller:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
