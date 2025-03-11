@@ -1,6 +1,6 @@
 import React from 'react'
-import { Box, Paper, TextField, IconButton, Typography } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
+import { Box, Paper, Typography } from "@mui/material";
+import MessageInput from './MessageInput';
 
 const ChatWindow = ({messages, handleSend, input, setInput}) => {
   return (
@@ -17,20 +17,7 @@ const ChatWindow = ({messages, handleSend, input, setInput}) => {
       </Box>
 
       {/* Message Input */}
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "center", paddingTop: 1 }}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          sx={{ marginBottom: { xs: 1, sm: 0 } }}
-        />
-        <IconButton color="primary" onClick={handleSend} sx={{ marginLeft: { sm: 1 } }}>
-          <SendIcon />
-        </IconButton>
-      </Box>
+      <MessageInput handleSend={handleSend} input={input} setInput={setInput} />
     </Paper>
   )
 }
