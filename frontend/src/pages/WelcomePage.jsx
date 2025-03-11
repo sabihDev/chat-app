@@ -16,6 +16,9 @@ const WelcomePage = ({user}) => {
     }
   };
 
+  console.log("from welcome",user);
+  
+
   return (
     <Container maxWidth="md" sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, height: "100vh", paddingTop: 2 }}>
       {/* Sidebar */}

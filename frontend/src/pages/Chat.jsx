@@ -35,7 +35,7 @@ const Chat = () => {
         setUser(null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -55,9 +55,10 @@ const Chat = () => {
       </Container>
     );
   }
+  
 
   return (
-    <WelcomePage user={user} />
+    <WelcomePage user={JSON.stringify(user)} />
   );
 };
 

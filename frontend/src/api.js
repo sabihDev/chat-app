@@ -31,6 +31,16 @@ export const registerUser = async (userData) => {
   }
 };
 
+// ✅ Login User Function
+export const loginUser = async (userData) => {
+  try {
+    const response = await api.post("/user/login", userData);
+    return response; // ✅ Return API response
+  } catch (error) {
+    throw error.response?.data?.message || "Registration failed"; // ✅ Handle API error
+  }
+};
+
 // ✅ Get User Details Function (Using API instance)
 export const getUserDetails = async () => {
   try {

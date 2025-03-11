@@ -7,54 +7,47 @@ import {
   Typography,
   Paper,
   useTheme,
+  Link,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api";
 
 const Login = () => {
   const theme = useTheme();
-
-  const formStyles = {
-    paper: {
-      p: 4,
-      width: "100%",
-      backgroundColor: theme.palette.background.paper,
-      borderRadius: theme.shape.borderRadius,
-    },
-    button: {
-      mt: 3,
-      mb: 2,
-      backgroundColor: theme.palette.primary.main,
-      "&:hover": {
-        backgroundColor: theme.palette.primary.dark,
-      },
-    },
-    textField: {
-      "& label.Mui-focused": {
-        color: theme.palette.primary.main,
-      },
-      "& .MuiOutlinedInput-root": {
-        "&.Mui-focused fieldset": {
-          borderColor: theme.palette.primary.main,
-        },
-      },
-    },
-  };
-
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setError("");
+
+    if (!formData.username.trim() || !formData.password.trim()) {
+      setError("Username and password are required");
+      return;
+    }
+
+    try {
+      const response = await loginUser(formData);
+
+      // Check if response contains the expected structure
+      if (response?.data?.token) {
+        localStorage.setItem("jwt", response.data.token);
+        navigate("/chat");
+      } else {
+        setError("Invalid login credentials");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+
+      // Ensure that the error is a string and not an object
+      setError(err.response?.data?.message || "Invalid username or password");
+    }
   };
 
   return (
@@ -67,10 +60,15 @@ const Login = () => {
           alignItems: "center",
         }}
       >
-        <Paper elevation={3} sx={formStyles.paper}>
+        <Paper elevation={3} sx={{ p: 4, width: "100%", borderRadius: theme.shape.borderRadius }}>
           <Typography component="h1" variant="h5" textAlign="center" mb={3}>
             Login
           </Typography>
+          {error && (
+            <Typography color="error" textAlign="center" mb={2}>
+              {error}
+            </Typography>
+          )}
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField
               margin="normal"
@@ -82,7 +80,6 @@ const Login = () => {
               autoComplete="username"
               value={formData.username}
               onChange={handleChange}
-              sx={formStyles.textField}
             />
             <TextField
               margin="normal"
@@ -92,20 +89,17 @@ const Login = () => {
               label="Password"
               type="password"
               id="password"
-              autoComplete="new-password"
+              autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
-              sx={formStyles.textField}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={formStyles.button}
-            >
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Login
             </Button>
           </Box>
+          <Typography textAlign="center">
+            Don't have an account? <Link href="/register">Register</Link>
+          </Typography>
         </Paper>
       </Box>
     </Container>

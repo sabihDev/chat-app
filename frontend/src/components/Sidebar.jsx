@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    alpha,
+  alpha,
   Avatar,
   Box,
   IconButton,
@@ -10,7 +10,7 @@ import {
   Paper,
   Tooltip,
   Typography,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 const Sidebar = ({ user, onSettings }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+
+  const parsedUser = JSON.parse(user || "{}");
 
   const onLogout = () => {
     localStorage.clear();
@@ -42,15 +44,18 @@ const Sidebar = ({ user, onSettings }) => {
         Friends
       </Typography>
       <List sx={{ paddingBottom: "50px" }}>
-        {user?.friends?.length > 0 ? (
-          user.friends.map((contact, index) => (
+        {Array.isArray(parsedUser?.friends) && parsedUser.friends.length > 0 ? (
+          parsedUser.friends.map((contact, index) => (
             <ListItem button key={index}>
               <ChatBubbleOutlineIcon sx={{ marginRight: 1 }} />
-              <ListItemText primary={contact} />
+              <ListItemText primary={contact.username || "Unknown"} />
             </ListItem>
           ))
         ) : (
-          <Typography variant="body2" sx={{ color: "gray", textAlign: "center" }}>
+          <Typography
+            variant="body2"
+            sx={{ color: "gray", textAlign: "center" }}
+          >
             No friends available
           </Typography>
         )}
@@ -74,17 +79,30 @@ const Sidebar = ({ user, onSettings }) => {
           boxShadow: theme.shadows[2],
         }}
       >
-        <Avatar alt={user?.fullName} src={user?.profilePic} sx={{ width: 32, height: 32 }} />
+        <Avatar
+          alt={parsedUser?.fullName || "Unknown User"}
+          src={parsedUser?.profilePic || ""}
+          sx={{ width: 32, height: 32 }}
+        />
         <Typography sx={{ flexGrow: 1, color: theme.palette.text.primary }}>
-          {user?.fullName || "Unknown User"}
+          {parsedUser?.fullName || "Unknown User"}
         </Typography>
+
         <Tooltip title="Settings">
-          <IconButton size="small" onClick={onSettings} sx={{ color: theme.palette.text.primary }}>
+          <IconButton
+            size="small"
+            onClick={onSettings}
+            sx={{ color: theme.palette.text.primary }}
+          >
             <SettingsIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title="Logout">
-          <IconButton size="small" onClick={onLogout} sx={{ color: theme.palette.text.primary }}>
+          <IconButton
+            size="small"
+            onClick={onLogout}
+            sx={{ color: theme.palette.text.primary }}
+          >
             <LogoutIcon />
           </IconButton>
         </Tooltip>
