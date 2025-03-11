@@ -1,26 +1,23 @@
 import React, { useEffect, useState } from "react";
+import {useNavigate} from "react-router-dom";
 import {
   Container,
-  Box,
-  Paper,
   Typography,
-  Avatar,
-  TextField,
-  Button,
   CircularProgress,
 } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
 import { getUserDetails } from "../api"; // ✅ API call to fetch user details
 import WelcomePage from "./WelcomePage";
 
 const Chat = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     if (!token) {
       setLoading(false);
+      navigate("/login");
       return;
     }
 

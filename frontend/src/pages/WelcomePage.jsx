@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container, Box, List, ListItem, ListItemText, Paper, TextField, IconButton, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 

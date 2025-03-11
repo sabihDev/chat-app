@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, TextField, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 
-const MessageInput = ({ handleSend, input, setInput }) => {
+const ChatWindow = ({ handleSend, input, setInput }) => {
     return (
 
 
@@ -24,4 +24,4 @@ const MessageInput = ({ handleSend, input, setInput }) => {
   )
 }
 
-export default MessageInput
+export default ChatWindow
