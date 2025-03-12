@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import { SnackbarProvider } from "notistack";
 import CustomToast from "./components/CustomToast";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
@@ -31,7 +33,7 @@ const Root = () => {
   const isAuthenticated = !!localStorage.getItem("jwt");
 
   return isAuthenticated ? (
-    <Navigate to="/chat" />
+    <Navigate to="/dashboard" />
   ) : (
     <Navigate to="/login" />
   )

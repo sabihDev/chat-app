@@ -1,26 +1,13 @@
 import React from "react";
-import {
-  alpha,
-  Avatar,
-  Box,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Tooltip,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import LogoutIcon from "@mui/icons-material/Logout";
-import SettingsIcon from "@mui/icons-material/Settings";
+import { Avatar, Box, Button, Divider, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import ChatIcon from "@mui/icons-material/Chat";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const Sidebar = ({ user, onSettings }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-
   const parsedUser = JSON.parse(user || "{}");
 
   const onLogout = () => {
@@ -29,85 +16,72 @@ const Sidebar = ({ user, onSettings }) => {
   };
 
   return (
-    <Paper
+    <Box
       sx={{
-        width: { xs: "100%", md: 250 },
-        height: "100%",
-        padding: 2,
-        marginBottom: { xs: 2, md: 0 },
-        marginRight: { md: 2 },
-        position: "relative",
-        boxShadow: theme.shadows[3],
+        width: 280,
+        height: "100vh",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[4],
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        py: 4,
+        borderRight: `2px solid ${theme.palette.primary.main}`,
       }}
     >
-      <Typography variant="h6" gutterBottom>
-        Friends
-      </Typography>
-      <List sx={{ paddingBottom: "50px" }}>
-        {Array.isArray(parsedUser?.friends) && parsedUser.friends.length > 0 ? (
-          parsedUser.friends.map((contact, index) => (
-            <ListItem button key={index}>
-              <ChatBubbleOutlineIcon sx={{ marginRight: 1 }} />
-              <ListItemText primary={contact.username || "Unknown"} />
-            </ListItem>
-          ))
-        ) : (
-          <Typography
-            variant="body2"
-            sx={{ color: "gray", textAlign: "center" }}
-          >
-            No friends available
-          </Typography>
-        )}
-      </List>
-
-      {/* User Info Section */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 10,
-          left: 10,
-          right: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          padding: 1,
-          backgroundColor: alpha(theme.palette.text.primary, 0.2),
-          color: theme.palette.primary.contrastText,
-          borderRadius: 2,
-          border: `1px solid ${theme.palette.text.primary}`,
-          boxShadow: theme.shadows[2],
-        }}
+      {/* App Title */}
+      <Typography
+        variant="h5"
+        fontWeight={700}
+        color={theme.palette.primary.main}
+        mb={3}
       >
-        <Avatar
-          alt={parsedUser?.fullName || "Unknown User"}
-          src={parsedUser?.profilePic || ""}
-          sx={{ width: 32, height: 32 }}
-        />
-        <Typography sx={{ flexGrow: 1, color: theme.palette.text.primary }}>
-          {parsedUser?.fullName || "Unknown User"}
-        </Typography>
+        Chat App
+      </Typography>
 
-        <Tooltip title="Settings">
-          <IconButton
-            size="small"
-            onClick={onSettings}
-            sx={{ color: theme.palette.text.primary }}
-          >
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Logout">
-          <IconButton
-            size="small"
-            onClick={onLogout}
-            sx={{ color: theme.palette.text.primary }}
-          >
-            <LogoutIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </Paper>
+      {/* User Avatar */}
+      <Avatar
+        sx={{ width: 80, height: 80, mb: 2 }}
+        src={parsedUser.profilePic}
+      />
+      <Typography variant="h6" fontWeight={600} mb={3}>
+        {parsedUser?.fullName || "User"}
+      </Typography>
+
+      <Divider sx={{ width: "80%", mb: 3 }} />
+
+      {/* Navigation Buttons */}
+      <Button
+        variant="contained"
+        fullWidth
+        startIcon={<ChatIcon />}
+        sx={{ mb: 2 }}
+        onClick={() => navigate("/chat")}
+      >
+        Chats
+      </Button>
+
+      <Button
+        variant="outlined"
+        fullWidth
+        startIcon={<SettingsIcon />}
+        onClick={onSettings}
+        sx={{ mb: 2 }}
+      >
+        Settings
+      </Button>
+
+      <Button
+        variant="outlined"
+        color="error"
+        fullWidth
+        startIcon={<LogoutIcon />}
+        onClick={onLogout}
+        sx={{ mt: "auto", mb: 2 }}
+      >
+        Logout
+      </Button>
+    </Box>
   );
 };
 

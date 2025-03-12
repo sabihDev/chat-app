@@ -7,6 +7,7 @@ import multer from "multer";
 import cloudinary from "cloudinary"
 import EstalishConnectionToDB from "./utils/connectToDB.js";
 import { userRoutes } from "./routes/user.routes.js";
+import { messageRoutes } from "./routes/message.routes.js";
 // import { Server } from "socket.io";
 
 
@@ -33,6 +34,7 @@ app.use(cors({ origin: 'http://localhost:5173' }));
 const PORT = process.env.PORT || 3000;
 
 app.use("/api/user", userRoutes);
+app.use("/api/message", messageRoutes);
 
 app.listen(PORT,(req, res)=>{
     console.log("Server is runing at PORT: " + PORT);

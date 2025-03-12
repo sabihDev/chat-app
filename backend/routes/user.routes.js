@@ -11,5 +11,6 @@ router.get('/details', authentication, getUserDetails);
 router.post('/send/friend-request', authentication, friendRequest);
 router.post('/request/status', authentication, friendRequestResponse);
 router.post('/search/new', authentication, findNewUserByQuery);
+router.post('/get/friends')
 
 export {router as userRoutes}

@@ -6,7 +6,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { getUserDetails } from "../api"; // ✅ API call to fetch user details
-import WelcomePage from "./WelcomePage";
+import Page from "./Page";
 
 const Chat = () => {
   const [user, setUser] = useState(null);
@@ -58,7 +58,7 @@ const Chat = () => {
   
 
   return (
-    <WelcomePage user={JSON.stringify(user)} />
+    <Page user={JSON.stringify(user)} page="chat" />
   );
 };
 
