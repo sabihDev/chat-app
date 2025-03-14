@@ -3,6 +3,7 @@ import FriendRequest from "../models/friendRequest.model.js";
 import bcrypt from "bcrypt";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import Message from "../models/message.model.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const getFriendsForSidebar = async (req, res) => {
   try {
