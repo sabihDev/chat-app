@@ -1,42 +1,18 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { Container } from "@mui/material";
-import Chat from "./pages/Chat";
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import { SnackbarProvider } from "notistack";
-import CustomToast from "./components/CustomToast";
-import Dashboard from "./pages/Dashboard";
+import React from "react";
 
-function App() {
+const App = () => {
   return (
     <>
-      <SnackbarProvider maxSnack={3}>
-        <Container maxWidth="md" sx={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Routes>
-            <Route path="/" element={<Root />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Container>
-      </SnackbarProvider>
+      <button className="btn btn-soft">Default</button>
+      <button className="btn btn-soft btn-primary">Primary</button>
+      <button className="btn btn-soft btn-secondary">Secondary</button>
+      <button className="btn btn-soft btn-accent">Accent</button>
+      <button className="btn btn-soft btn-info">Info</button>
+      <button className="btn btn-soft btn-success">Success</button>
+      <button className="btn btn-soft btn-warning">Warning</button>
+      <button className="btn btn-soft btn-error">Error</button>
     </>
   );
-}
-
-const Root = () => {
-
-  const isAuthenticated = !!localStorage.getItem("jwt");
-
-  return isAuthenticated ? (
-    <Navigate to="/dashboard" />
-  ) : (
-    <Navigate to="/login" />
-  )
 };
 
 export default App;
