@@ -1,18 +1,38 @@
-import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Chat from "./pages/Chat";
+import Home from "./pages/Home";
+import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
-const App = () => {
+import Navbar from "./components/Navbar";
+import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
+
+function App() {
+  const {authUser, checkAuth} = useAuthStore();
+
+  useEffect(()=>{
+    checkAuth();
+  },[checkAuth]);
   return (
     <>
-      <button className="btn btn-soft">Default</button>
-      <button className="btn btn-soft btn-primary">Primary</button>
-      <button className="btn btn-soft btn-secondary">Secondary</button>
-      <button className="btn btn-soft btn-accent">Accent</button>
-      <button className="btn btn-soft btn-info">Info</button>
-      <button className="btn btn-soft btn-success">Success</button>
-      <button className="btn btn-soft btn-warning">Warning</button>
-      <button className="btn btn-soft btn-error">Error</button>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/chat" element={<Chat />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/Settings" element={<Settings />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </>
   );
-};
+}
 
 export default App;

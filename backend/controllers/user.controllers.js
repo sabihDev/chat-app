@@ -224,7 +224,7 @@ export const findNewUserByQuery = async (req, res) => {
     }
 }
 
-export const getUserDetails = async (req, res) => {
+export const checkAuth = async (req, res) => {
     try {
         // Ensure user is authenticated
         if (!req.user || !req.user.userId) {
