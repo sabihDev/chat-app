@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import FriendRequest from "../models/friendRequest.model.js";
 import bcrypt from "bcrypt"
 import generateTokenAndSetCookie from "../utils/generateToken.js";
+import cloudinary from "../utils/cloudinary.js"
 
 export const register = async (req, res) => {
     try {
@@ -265,4 +266,28 @@ export const checkAuth = async (req, res) => {
         console.error("Error in getUserDetails controller:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
+};
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user._id;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile pic is required" });
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("error in update profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

@@ -7,6 +7,7 @@ import {
   login,
   logout,
   register,
+  updateProfile,
 } from "../controllers/user.controllers.js";
 import authentication from "../utils/authentication.js";
 
@@ -16,6 +17,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
 router.get("/check/auth", authentication, checkAuth);
+router.put("/update-profile", authentication, updateProfile);
 router.post("/send/friend-request", authentication, friendRequest);
 router.post("/request/status", authentication, friendRequestResponse);
 router.post("/search/new", authentication, findNewUserByQuery);
