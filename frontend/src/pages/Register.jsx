@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuthImagePattern from '../components/AuthImagePattern';
+import toast from 'react-hot-toast';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,10 +19,22 @@ const Register = () => {
 
   const { signup, isSigningUp } = useAuthStore();
 
-  const validateForm = () => { };
+  const validateForm = () => {
+    if (!formData.username) return toast.error("Username is required");
+    if (!formData.fullName) return toast.error("Full name is required");
+    if (!formData.email) return toast.error("Email is required");
+    if (!formData.password) return toast.error("Password is required");
+    if (!formData.confirmPassword) return toast.error("Confirm Password is required");
+    if ((formData.password.length < 6) || (formData.confirmPassword.length < 6)) return toast.error("Passwords must be at least 6 characters");
+    if (!(formData.password === formData.confirmPassword)) return toast.error("Passwords did not match");
+    if (!/\S+@\S+\.\S/.test(formData.email)) return toast.error("Email is not valid");
+    return true;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const success = validateForm();
+    if( success === true) signup(formData)
   };
 
   return (
@@ -164,7 +177,7 @@ const Register = () => {
             {/* Submit Button */}
             <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
               {isSigningUp ? <>
-                <Loader2 className='size-5 animate-spin'/>
+                <Loader2 className='size-5 animate-spin' />
                 Loading...
               </> : "Create Account"}
             </button>
@@ -172,7 +185,7 @@ const Register = () => {
 
           <div className="text-center">
             <p className="text-base-content/60">
-            Already have an account?{" "}
+              Already have an account?{" "}
               <Link to='/login' className='link link-primary'>Sign in</Link>
             </p>
           </div>
@@ -182,7 +195,7 @@ const Register = () => {
       <AuthImagePattern
         title="Join our community"
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
-       />
+      />
     </div>
   )
 }

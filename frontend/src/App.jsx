@@ -14,6 +14,8 @@ import Navbar from "./components/Navbar";
 import { useAuthStore } from "./store/useAuthStore";
 import { Loader } from "lucide-react";
 
+import {Toaster} from "react-hot-toast";
+
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
 
@@ -41,6 +43,8 @@ function App() {
         <Route path="/dashboard" element={authUser ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      <Toaster/>
     </div>
   );
 }

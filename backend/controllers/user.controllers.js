@@ -8,38 +8,58 @@ export const register = async (req, res) => {
         const { fullName, email, username, password, confirmPassword, gender } = req.body;
 
         if (!fullName || !email || !username || !password || !confirmPassword || !gender) {
-            return res.status(400).json({ error: "All fields are required" });
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         if (password !== confirmPassword) {
-            return res.status(400).json({ error: "Passwords don't match" });
+            return res.status(400).json({ message: "Passwords don't match" });
         }
 
-        const user = await User.findOne({ username });
-
-        if (user) {
-            return res.status(400).json({ error: "Username already exists" });
+        // Check if username already exists
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return res.status(400).json({ message: "Username already exists" });
         }
 
+        // Check if email already exists
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-        const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
+        // Generate profile picture based on gender
+        const profilePic = `https://avatar.iran.liara.run/public/${gender === 'male' ? "boy" : "girl"}?username=${username}`;
 
+        // Create a new user
         const newUser = new User({
             fullName,
             username,
             email,
             password: hashedPassword,
-            gender,
-            profilePic: gender === "male" ? boyProfilePic : girlProfilePic
+            gender: gender == "male" ? "male": grnder == "female" ? "female":"other",
+            profilePic,
         });
 
-        await newUser.save();
+        // Save new user with duplicate key error handling
+        try {
+            await newUser.save();
+        } catch (error) {
+            if (error.code === 11000) {
+                return res.status(400).json({ message: "Email or Username already exists" });
+            }
+            throw error;
+        }
 
+        // Generate JWT token and set cookie
         const token = generateTokenAndSetCookie(newUser._id, res);
 
-        res.status(200).json({
+        console.log(newUser);
+        
+
+        res.status(201).json({
             _id: newUser._id,
             fullName: newUser.fullName,
             username: newUser.username,
@@ -48,8 +68,8 @@ export const register = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error in register controller: ", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error in register controller:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
