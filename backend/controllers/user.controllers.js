@@ -39,7 +39,7 @@ export const register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            gender: gender == "male" ? "male": grnder == "female" ? "female":"other",
+            gender: gender == "male" ? "male" : grnder == "female" ? "female" : "other",
             profilePic,
         });
 
@@ -55,9 +55,6 @@ export const register = async (req, res) => {
 
         // Generate JWT token and set cookie
         const token = generateTokenAndSetCookie(newUser._id, res);
-
-        console.log(newUser);
-        
 
         res.status(201).json({
             _id: newUser._id,
