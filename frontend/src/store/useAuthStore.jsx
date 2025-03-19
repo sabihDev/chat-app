@@ -36,6 +36,20 @@ export const useAuthStore = create((set) => ({
     }
   },
 
+  login: async (data) => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post("/user/login", data);
+      localStorage.setItem("jwt", res.data.token);
+      set({ authUser: res.data });
+      toast.success("You logged in successfully");
+    } catch (error) {
+      toast.error(error.res?.data?.message || "Signup failed. Please try again.");
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+
   logout: async () =>{
     try {
       await axiosInstance.post("/user/logout");

@@ -36,7 +36,7 @@ const Navbar = () => {
 
                 <button className="flex items-center gap-2 cursor-pointer" onClick={logout}>
                   <LogOut className="size-5" />
-                  <span className="hidden sm:inline">Profile</span>
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </>
             )}
