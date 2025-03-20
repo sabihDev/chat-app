@@ -30,7 +30,9 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Account Created Successfully");
     } catch (error) {
-      toast.error(error.res?.data?.message || "Signup failed. Please try again.");
+      toast.error(
+        error.res?.data?.message || "Signup failed. Please try again."
+      );
     } finally {
       set({ isSigningUp: false });
     }
@@ -44,16 +46,18 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("You logged in successfully");
     } catch (error) {
-      toast.error(error.res?.data?.message || "Signup failed. Please try again.");
+      toast.error(
+        error.res?.data?.message || "Signup failed. Please try again."
+      );
     } finally {
       set({ isSigningUp: false });
     }
   },
 
-  logout: async () =>{
+  logout: async () => {
     try {
       await axiosInstance.post("/user/logout");
-      set({authUser: null});
+      set({ authUser: null });
       toast.success("You logged out successfully");
       localStorage.clear("jwt");
     } catch (error) {
@@ -61,7 +65,27 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  updateProfile: async (data) =>{
+ updateProfile: async (data) => {
+  set({ isUpdatingProfile: true });
+
+  try {
+    const res = await axiosInstance.put("/user/update-profile", {profilePic: data});
+    set({ authUser: res });
+    toast.success("Profile updated successfully");
+    console.log(res.data);
     
-  },
+  } catch (error) {
+    console.error("Error in updateProfile:", error);
+
+    // Handle different types of errors gracefully
+    const errorMessage =
+      error.response?.data?.message || "Something went wrong. Please try again.";
+
+    toast.error(errorMessage);
+  } finally {
+    set({ isUpdatingProfile: false });
+  }
+},
+
+
 }));

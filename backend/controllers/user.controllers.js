@@ -271,23 +271,37 @@ export const checkAuth = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
+
     const { profilePic } = req.body;
-    const userId = req.user._id;
+    const userId = req.user?.userId;
+    console.log(userId);
+    
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
 
     if (!profilePic) {
       return res.status(400).json({ message: "Profile pic is required" });
     }
 
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
-      { new: true }
-    );
+      { new: true, runValidators: true }
+    ).select("-password");
 
+    await updatedUser.save();
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    console.log(updatedUser);
+    
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("error in update profile:", error);
+    console.error("Error updating profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

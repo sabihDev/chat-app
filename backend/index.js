@@ -25,7 +25,9 @@ const app = express();
 //   },
 // });
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // Increase limit for Base64 images
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Support URL-encoded bodies
+
 app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
