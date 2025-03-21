@@ -14,10 +14,13 @@ import Navbar from "./components/Navbar";
 import { useAuthStore } from "./store/useAuthStore";
 import { Loader } from "lucide-react";
 
-import {Toaster} from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import { useThemeStore } from "./store/useThemeStore";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     checkAuth(); // Ensure checkAuth is memoized in the store
@@ -31,7 +34,7 @@ function App() {
     );
 
   return (
-    <div>
+    <div data-theme={theme}>
       <Navbar />
       <Routes>
         <Route path="/" element={authUser ? <Home /> : <Navigate to="/login" />} />
@@ -44,7 +47,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <Toaster/>
+      <Toaster />
     </div>
   );
 }
