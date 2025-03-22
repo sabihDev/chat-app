@@ -8,13 +8,13 @@ import cloudinary from "cloudinary";
 import EstalishConnectionToDB from "./utils/connectToDB.js";
 import { userRoutes } from "./routes/user.routes.js";
 import { messageRoutes } from "./routes/message.routes.js";
+import { app, server } from "./utils/socket.js";
 // import { Server } from "socket.io";
 
 // initialize config file
 dotenv.config();
 
 // setting up express app
-const app = express();
 
 // setting up socket.io
 // const server = http.createServer(app);
@@ -37,7 +37,7 @@ const PORT = process.env.PORT || 3000;
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
 
-app.listen(PORT, (req, res) => {
+server.listen(PORT, (req, res) => {
   console.log("Server is runing at PORT: " + PORT);
   EstalishConnectionToDB(process.env.MONGO_URI);
 });
