@@ -18,8 +18,6 @@ const Sidebar = () => {
   // Fix: Ensure we are accessing the correct array
   const friendsList = Array.isArray(friendsData.friends) ? friendsData.friends : [];
 
-  console.log("Friends Data:", friendsData); // Debugging
-  console.log("Extracted Friends List:", friendsList); // Check if it's an array
 
   const filteredUsers = showOnlineOnly
     ? friendsList.filter(user => onlineUsers.includes(user._id))
