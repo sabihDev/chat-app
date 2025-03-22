@@ -25,7 +25,7 @@ export const getFriendsForSidebar = async (req, res) => {
   }
 };
 
-export const getMessage = async (req, res) => {
+export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
     const myId = req.user.userId;
@@ -46,48 +46,29 @@ export const getMessage = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { message } = req.body;
-    const attachmentFiles = req.files || [];
-    const { id: receiverId } = req.params;
+    const { text, image } = req.body;
+    const { id: receiverId } = req.params;  
     const senderId = req.user.userId;
 
-    if (!message && attachmentFiles.length === 0) {
-      return res.status(400).json({ error: "Message content or attachments are required" });
-    }
-
-    // Upload attachments to Cloudinary if any
-    const uploadedAttachments = [];
-    if (attachmentFiles.length > 0) {
-      for (const file of attachmentFiles) {
-        try {
-          const result = await cloudinary.uploader.upload(file.path, {
-            folder: "chat-attachments",
-            resource_type: "auto", // Automatically detect file type
-          });
-          uploadedAttachments.push({
-            url: result.secure_url,
-            public_id: result.public_id,
-            type: file.mimetype
-          });
-        } catch (uploadError) {
-          console.log("Error uploading file to Cloudinary:", uploadError);
-          return res.status(500).json({ error: "Error uploading attachments" });
-        }
-      }
+    let imageUrl;
+    if (image) {
+      // Upload base64 image to cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      imageUrl = uploadResponse.secure_url;
     }
 
     const newMessage = new Message({
       sender: senderId,
       receiver: receiverId,
-      text: message,
-      attachments: uploadedAttachments
+      text,
+      image: imageUrl,
     });
 
     await newMessage.save();
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sending message:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

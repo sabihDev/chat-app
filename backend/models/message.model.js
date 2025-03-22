@@ -15,19 +15,13 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
-    chatId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Chat',
-        required: true
-    },
     readBy: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
     }],
-    attachments: [{
-        type: String,
-        required: false
-    }]
+    image: {
+      type: String,
+    },
 }, {
     timestamps: true
 });
