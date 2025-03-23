@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../utils/cloudinary.js";
+import { getRecieverId } from "../utils/socket.js";
 
 export const getFriendsForSidebar = async (req, res) => {
   try {
@@ -65,6 +66,11 @@ export const sendMessage = async (req, res) => {
     });
 
     await newMessage.save();
+
+    const recieverSocketId = getRecieverId(receiverId);
+    if (recieverSocketId) {
+      io.to(recieverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {

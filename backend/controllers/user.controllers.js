@@ -32,7 +32,7 @@ export const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate profile picture based on gender
-        const profilePic = `https://avatar.iran.liara.run/public/${gender === 'male' ? "boy" : "girl"}?username=${username}`;
+        const profilePic = `https://api.dicebear.com/7.x/adventurer/svg?seed=${gender === 'male' ? "boy" : "girl"}?username=${username}`;
 
         // Create a new user
         const newUser = new User({

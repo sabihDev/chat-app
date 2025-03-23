@@ -8,20 +8,22 @@ const Sidebar = () => {
   const { getUsers, friends: friendsData, selectedUser, setSelectedUser, isFriendsLoading } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  console.log(onlineUsers);
+  
 
   useEffect(() => {
     getUsers();
-  }, [getUsers]);
+    console.log(onlineUsers);
+    
+  }, [getUsers,onlineUsers]);
 
   if (isFriendsLoading) return <SidebarSkeleton />;
 
   // Fix: Ensure we are accessing the correct array
   const friendsList = Array.isArray(friendsData.friends) ? friendsData.friends : [];
 
-
-  const filteredUsers = showOnlineOnly
-    ? friendsList.filter(user => onlineUsers.includes(user._id))
-    : friendsList;
+  console.log(friendsList);
+  
 
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
@@ -46,8 +48,8 @@ const Sidebar = () => {
       </div>
 
       <div className="overflow-y-auto w-full py-3">
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map((user) => (
+        {friendsList.length > 0 ? (
+          friendsList.map((user) => (
             <button
               key={user._id}
               onClick={() => setSelectedUser(user)}
