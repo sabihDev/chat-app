@@ -8,21 +8,25 @@ import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
 
 const ChatWindow = () => {
-  const { messages, getMessages, isMessagesLoading, selectedUser } = useChatStore();
+  const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages, } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
 
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-    }
-  }, [selectedUser?._id, getMessages]);
+    getMessages(selectedUser._id);
+
+    subscribeToMessages();
+
+    return () => unsubscribeFromMessages();
+  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeFromMessages, messages]);
 
   useEffect(() => {
     if (messageEndRef.current && messages?.messages?.length) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages?.messages]);
+
+
+  }, [messages]);
 
   if (isMessagesLoading) {
     return (
@@ -40,7 +44,7 @@ const ChatWindow = () => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {Array.isArray(messages?.messages) &&
-          messages.messages.map((message) => (
+          messages?.messages.map((message) => (
             <div
               key={message._id}
               className={`chat ${message.sender === authUser?.data?._id ? "chat-end" : "chat-start"}`}
@@ -63,7 +67,7 @@ const ChatWindow = () => {
                   {formatMessageTime(message.createdAt)}
                 </time>
               </div>
-              <div className="chat-bubble flex flex-col">
+              <div className={`chat-bubble flex flex-col ${message.sender === authUser?.data?._id ? "bg-primary text-primary-content" : "bg-base-200"} ` } >
                 {message.image && (
                   <img
                     src={message.image}

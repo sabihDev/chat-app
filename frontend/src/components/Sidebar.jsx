@@ -5,25 +5,23 @@ import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
 
 const Sidebar = () => {
-  const { getUsers, friends: friendsData, selectedUser, setSelectedUser, isFriendsLoading } = useChatStore();
+  const { getUsers, friends, selectedUser, setSelectedUser, isFriendsLoading } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
-  console.log(onlineUsers);
-  
 
   useEffect(() => {
     getUsers();
-    console.log(onlineUsers);
     
-  }, [getUsers,onlineUsers]);
+  }, [getUsers,]);
 
   if (isFriendsLoading) return <SidebarSkeleton />;
 
   // Fix: Ensure we are accessing the correct array
-  const friendsList = Array.isArray(friendsData.friends) ? friendsData.friends : [];
+  const friendsList = Array.isArray(friends.friends) ? friends.friends : [];
 
-  console.log(friendsList);
-  
+  const filteredUsers = showOnlineOnly
+    ? friendsList.filter((user) => onlineUsers.includes(user._id))
+    : friendsList;
 
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
@@ -43,13 +41,13 @@ const Sidebar = () => {
             />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">({onlineUsers.length} online)</span>
+          <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
         </div>
       </div>
 
       <div className="overflow-y-auto w-full py-3">
-        {friendsList.length > 0 ? (
-          friendsList.map((user) => (
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map((user) => (
             <button
               key={user._id}
               onClick={() => setSelectedUser(user)}

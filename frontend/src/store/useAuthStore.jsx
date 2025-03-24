@@ -16,12 +16,11 @@ export const useAuthStore = create((set, get) => ({
 
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/user/check/auth");
+      const res = await axiosInstance.post("/user/check/auth");
       set({ authUser: res.data });
-      console.log(res.data);
       get().connectSocket();
     } catch (error) {
-      console.error("Error in checking auth:", error);
+      console.error("Error in checkAuth:", error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -37,9 +36,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Account Created Successfully");
       get().connectSocket();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Signup failed. Please try again."
-      );
+      toast.error(error.response?.data?.message || "Signup failed. Please try again.");
     } finally {
       set({ isSigningUp: false });
     }
@@ -54,9 +51,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("You have logged in successfully");
       get().connectSocket();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
-      );
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
       set({ isLoggingIn: false });
     }
@@ -76,50 +71,41 @@ export const useAuthStore = create((set, get) => ({
 
   updateProfile: async (data) => {
     set({ isUpdatingProfile: true });
-
     try {
       const res = await axiosInstance.put("/user/update-profile", {
         profilePic: data,
       });
       set({ authUser: res.data });
       toast.success("Profile updated successfully");
-      console.log(res.data);
     } catch (error) {
       console.error("Error in updateProfile:", error);
-
-      // Handle different types of errors gracefully
-      const errorMessage =
-        error.response?.data?.message || "Something went wrong. Please try again.";
-
-      toast.error(errorMessage);
+      toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       set({ isUpdatingProfile: false });
     }
   },
 
   connectSocket: () => {
-    const { authUser } = get();
-    if (!authUser || get().socket?.connected) return;
+    const { authUser, socket } = get();
+    if (!authUser?.data?._id || socket?.connected) return;
 
-    console.log(authUser);
-    
-    const socket = io(BASE_URL, {
-      query: {
-        userId: authUser.data._id,
-      },
+    const newSocket = io(BASE_URL, {
+      query: { userId: authUser.data._id },
     });
 
-    console.log(authUser.data);
-    
-    socket.connect();
+    newSocket.connect();
+    set({ socket: newSocket });
 
-    set({ socket: socket });
-
-    socket.on("getOnlineUsers", (userIds) => {
+    newSocket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
   },
+
   disconnectSocket: () => {
-    if (get().socket?.connected) get().socket.disconnect();
+    const { socket } = get();
+    if (socket?.connected) {
+      socket.disconnect();
+      set({ socket: null });
+    }
   },
 }));

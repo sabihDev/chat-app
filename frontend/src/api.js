@@ -45,7 +45,6 @@ export const loginUser = async (userData) => {
 export const getUserDetails = async () => {
   try {
     const response = await api.get("/user/details"); // ✅ GET request instead of POST
-    console.log(response.data);
 
     return response.data; // ✅ Return user details
 

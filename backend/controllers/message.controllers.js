@@ -1,10 +1,7 @@
 import User from "../models/user.model.js";
-import FriendRequest from "../models/friendRequest.model.js";
-import bcrypt from "bcrypt";
-import generateTokenAndSetCookie from "../utils/generateToken.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../utils/cloudinary.js";
-import { getRecieverId } from "../utils/socket.js";
+import { getReceiverSocketId, io } from "../utils/socket.js";
 
 export const getFriendsForSidebar = async (req, res) => {
   try {
@@ -40,22 +37,26 @@ export const getMessages = async (req, res) => {
 
     res.status(200).json({ messages });
   } catch (error) {
-    console.log("Error in getting message ", error);
-    req.status(500).json({ error: "Internal Server Error" });
+    console.log("Error in getting messages: ", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 export const sendMessage = async (req, res) => {
   try {
     const { text, image } = req.body;
-    const { id: receiverId } = req.params;  
+    const { id: receiverId } = req.params;
     const senderId = req.user.userId;
 
-    let imageUrl;
+    let imageUrl = null;
     if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(image);
+        imageUrl = uploadResponse.secure_url;
+      } catch (uploadError) {
+        console.error("Cloudinary upload failed: ", uploadError.message);
+        return res.status(500).json({ error: "Image upload failed" });
+      }
     }
 
     const newMessage = new Message({
@@ -67,14 +68,16 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
-    const recieverSocketId = getRecieverId(receiverId);
-    if (recieverSocketId) {
-      io.to(recieverSocketId).emit("newMessage", newMessage);
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    } else {
+      console.log(`User ${receiverId} is not online.`);
     }
 
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
