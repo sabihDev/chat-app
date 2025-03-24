@@ -318,6 +318,9 @@ export const getLoggedInUserRequests = async(req, res) => {
         const requests = await FriendRequest.find({ recipient: userId, status: "pending" })
             .populate("sender", "username fullName profilePic");
 
+        // Emit real-time update to the specific user
+        req.io.to(userId).emit('friendRequests', requests);
+
         res.status(200).json(requests);
         
     } catch (error) {
