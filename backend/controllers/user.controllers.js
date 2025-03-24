@@ -3,6 +3,7 @@ import FriendRequest from "../models/friendRequest.model.js";
 import bcrypt from "bcrypt"
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import cloudinary from "../utils/cloudinary.js"
+import { io } from "../utils/socket.js";
 
 export const register = async (req, res) => {
     try {
@@ -121,43 +122,49 @@ export const friendRequest = async (req, res) => {
         const senderId = req.user.userId;
 
         if (userId === senderId) {
-            return res.status(400).json({ error: "You cannot send a friend request to yourself." });
+            return res.status(400).json({ error: true, message: "You cannot send a friend request to yourself." });
         }
 
         const recipient = await User.findById(userId);
         const sender = await User.findById(senderId);
 
         if (!recipient || !sender) {
-            return res.status(404).json({ error: "User not found." });
+            return res.status(404).json({ error: true, message: "User not found." });
         }
 
         if (sender.friends.includes(userId)) {
-            return res.status(400).json({ error: "You are already friends with this user." });
+            return res.status(400).json({ error: true, message: "You are already friends with this user." });
         }
 
         if (recipient.friendRequests.includes(senderId)) {
-            return res.status(400).json({ error: "Friend request already sent." });
+            return res.status(400).json({ error: true, message: "Friend request already sent." });
         }
 
-        // Check if a friend request already exists
         const existingRequest = await FriendRequest.findOne({ sender: senderId, recipient: userId });
 
         if (existingRequest) {
-            return res.status(400).json({ error: "Friend request already exists." });
+            return res.status(400).json({ error: true, message: "Friend request already exists." });
         }
 
-        // Fix: Push only ObjectId, not an object
-        recipient.friendRequests.push(senderId);
-        await recipient.save();
+        // Add sender ID to recipient's friendRequests array
+        await recipient.updateOne({ $push: { friendRequests: senderId } });
 
+        // Create a new friend request document
         const newFriendRequest = new FriendRequest({ sender: senderId, recipient: userId });
         await newFriendRequest.save();
 
-        return res.status(200).json({ message: "Friend request sent successfully.", newFriendRequest });
+        // Fetch the populated friend request for real-time update
+        const populatedRequest = await FriendRequest.findById(newFriendRequest._id)
+            .populate("sender", "username fullName profilePic");
+
+        // Emit real-time update to the recipient
+        io.to(recipient._id.toString()).emit("newFriendRequest", populatedRequest);
+
+        return res.status(200).json({ error: false, message: "Friend request sent successfully.", newFriendRequest });
 
     } catch (error) {
-        console.log("Error in friendRequest controller: ", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error in friendRequest controller:", error.message);
+        res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
 
@@ -189,26 +196,47 @@ export const friendRequestResponse = async (req, res) => {
             // Delete friend request document
             await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReciever });
 
+            // Emit real-time update for request rejection
+            io.to(RequestSender).emit("friendRequestResponse", {
+                status: "rejected",
+                user: RequestRecieverUser.username,
+            });
+
             return res.status(200).json({ error: false, message: "Request rejected", user: { username: RequestRecieverUser.username } });
         }
 
         // Accepting friend request
         await RequestRecieverUser.updateOne({
             $pull: { friendRequests: RequestSender },
-            $push: { friends: RequestSender }
+            $push: { friends: RequestSender },
         });
 
         await RequestSenderUser.updateOne({
-            $push: { friends: RequestReciever }
+            $push: { friends: RequestReciever },
         });
 
-        // Update friend request status
-        await FriendRequest.updateOne({ sender: RequestSender, recipient: RequestReciever }, { status: "accepted" });
+        // Delete the friend request document
+        await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReciever });
 
-        return res.status(200).json({ error: false, message: "Request accepted", user: { username: RequestRecieverUser.username } });
+        // Emit real-time update for request acceptance
+        io.to(RequestSender).emit("friendRequestResponse", {
+            status: "accepted",
+            user: RequestRecieverUser.username,
+        });
+
+        io.to(RequestReciever).emit("friendRequestResponse", {
+            status: "accepted",
+            user: RequestSenderUser.username,
+        });
+
+        // Remove password before sending response
+        const sanitizedUser = RequestRecieverUser.toObject();
+        delete sanitizedUser.password;
+
+        return res.status(200).json({ error: false, message: "Request accepted", user: sanitizedUser });
 
     } catch (error) {
-        console.log("Error in friendRequestResponse:", error.message);
+        console.error("Error in friendRequestResponse:", error.message);
         res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
@@ -306,25 +334,27 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const getLoggedInUserRequests = async(req, res) => {
+export const getLoggedInUserRequests = async (req, res) => {
     try {
         const userId = req.user?.userId;
 
         if (!userId) {
-            return res.status(401).json({ error: "Unauthorized access" });
+            return res.status(401).json({ error: true, message: "Unauthorized access" });
         }
 
         // Find friend requests where the logged-in user is the recipient
         const requests = await FriendRequest.find({ recipient: userId, status: "pending" })
             .populate("sender", "username fullName profilePic");
 
-        // Emit real-time update to the specific user
-        req.io.to(userId).emit('friendRequests', requests);
+        // Emit real-time update to the specific user if io exists
+        if (typeof io !== "undefined") {
+            io.to(userId.toString()).emit("friendRequests", requests);
+        }
 
-        res.status(200).json(requests);
-        
+        res.status(200).json({ error: false, requests });
+
     } catch (error) {
         console.error("Error in getLoggedInUserRequests:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
