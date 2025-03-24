@@ -305,3 +305,23 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getLoggedInUserRequests = async(req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized access" });
+        }
+
+        // Find friend requests where the logged-in user is the recipient
+        const requests = await FriendRequest.find({ recipient: userId, status: "pending" })
+            .populate("sender", "username fullName profilePic");
+
+        res.status(200).json(requests);
+        
+    } catch (error) {
+        console.error("Error in getLoggedInUserRequests:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};

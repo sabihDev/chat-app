@@ -4,6 +4,7 @@ import {
   findNewUserByQuery,
   friendRequest,
   friendRequestResponse,
+  getLoggedInUserRequests,
   login,
   logout,
   register,
@@ -19,6 +20,7 @@ router.post("/logout", logout);
 router.post("/check/auth", authentication, checkAuth);
 router.put("/update-profile", authentication, updateProfile);
 router.post("/send/friend-request", authentication, friendRequest);
+router.get("/get/friend-request", authentication, getLoggedInUserRequests);
 router.post("/request/status", authentication, friendRequestResponse);
 router.post("/search/new", authentication, findNewUserByQuery);
 router.post("/get/friends");
