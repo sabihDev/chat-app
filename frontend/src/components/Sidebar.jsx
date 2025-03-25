@@ -165,6 +165,9 @@ const Sidebar = () => {
                 </div>
                 <div className="hidden lg:block text-left min-w-0">
                   <div className="font-medium truncate">{user.fullName}</div>
+                  <p className="text-base-content/50 text-sm">{
+                      onlineUsers.includes(user._id) ? "Online" : "Offline"
+                    }</p>
                 </div>
               </button>
             ))
