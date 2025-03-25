@@ -7,7 +7,6 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 
 import Navbar from "./components/Navbar";
 import { useAuthStore } from "./store/useAuthStore";
@@ -41,7 +40,6 @@ function App() {
         <Route path="/register" element={!authUser ? <Register /> : <Navigate to="/" />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/settings" element={authUser ? <Settings /> : <Navigate to="/login" />} />
-        <Route path="/dashboard" element={authUser ? <Dashboard /> : <Navigate to="/login" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 

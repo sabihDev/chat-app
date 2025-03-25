@@ -170,74 +170,79 @@ export const friendRequest = async (req, res) => {
 
 export const friendRequestResponse = async (req, res) => {
     try {
-        const RequestSender = req.user.userId;
-        const RequestReciever = req.query.userId;
-        const RequestResponse = req.body.response;
+        const RequestReceiver = req.user.userId; // The one responding to the request
+        const RequestSender = req.query.userId; // The one who sent the original request
+        const RequestResponse = req.body.response; // "accepted" or "rejected"
+
+        console.log("Friend Request Response:", RequestResponse);
 
         // Fetch users
-        const RequestRecieverUser = await User.findById(RequestReciever);
+        const RequestReceiverUser = await User.findById(RequestReceiver);
         const RequestSenderUser = await User.findById(RequestSender);
 
-        if (!RequestRecieverUser || !RequestSenderUser) {
+        if (!RequestReceiverUser || !RequestSenderUser) {
             return res.status(400).json({ error: true, message: "User does not exist" });
         }
 
         // Check if friend request exists
-        const isFriendRequestExist = await FriendRequest.findOne({ sender: RequestSender, recipient: RequestReciever });
+        const friendRequest = await FriendRequest.findOne({
+            sender: RequestSender,
+            recipient: RequestReceiver, // Sender sent request to receiver
+        });
 
-        if (!isFriendRequestExist) {
+        if (!friendRequest) {
             return res.status(400).json({ error: true, message: "This request does not exist" });
         }
 
         if (RequestResponse === "rejected") {
             // Remove friend request from receiver
-            await RequestRecieverUser.updateOne({ $pull: { friendRequests: RequestSender } });
+            await RequestReceiverUser.updateOne({ $pull: { friendRequests: RequestSender } });
 
             // Delete friend request document
-            await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReciever });
+            await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReceiver });
 
             // Emit real-time update for request rejection
             io.to(RequestSender).emit("friendRequestResponse", {
                 status: "rejected",
-                user: RequestRecieverUser.username,
+                user: RequestReceiverUser.username,
             });
 
-            return res.status(200).json({ error: false, message: "Request rejected", user: { username: RequestRecieverUser.username } });
+            return res.status(200).json({ error: false, message: "Request rejected" });
         }
 
         // Accepting friend request
-        await RequestRecieverUser.updateOne({
+        await RequestReceiverUser.updateOne({
             $pull: { friendRequests: RequestSender },
             $push: { friends: RequestSender },
         });
 
         await RequestSenderUser.updateOne({
-            $push: { friends: RequestReciever },
+            $push: { friends: RequestReceiver },
         });
 
         // Delete the friend request document
-        await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReciever });
+        await FriendRequest.deleteOne({ sender: RequestSender, recipient: RequestReceiver });
 
         // Emit real-time update for request acceptance
         io.to(RequestSender).emit("friendRequestResponse", {
             status: "accepted",
-            user: RequestRecieverUser.username,
+            user: RequestReceiverUser.username,
         });
 
-        io.to(RequestReciever).emit("friendRequestResponse", {
+        io.to(RequestReceiver).emit("friendRequestResponse", {
             status: "accepted",
             user: RequestSenderUser.username,
         });
 
         // Remove password before sending response
-        const sanitizedUser = RequestRecieverUser.toObject();
+        const sanitizedUser = RequestReceiverUser.toObject();
         delete sanitizedUser.password;
 
         return res.status(200).json({ error: false, message: "Request accepted", user: sanitizedUser });
 
     } catch (error) {
         console.error("Error in friendRequestResponse:", error.message);
-        res.status(500).json({ error: true, message: "Internal Server Error" });
+        return res.status(500).json({ error: true, message: "Internal Server Error" });
     }
 };
 
@@ -350,6 +355,8 @@ export const getLoggedInUserRequests = async (req, res) => {
         if (typeof io !== "undefined") {
             io.to(userId.toString()).emit("friendRequests", requests);
         }
+
+        if(!requests) return res.status(200).json({error:false,message:"You have no friend requests right now."})
 
         res.status(200).json({ error: false, requests });
 
