@@ -41,7 +41,7 @@ export const register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            gender: gender == "male" ? "male" : grnder == "female" ? "female" : "other",
+            gender: gender == "male" ? "male" : gender == "female" ? "female" : "other",
             profilePic,
         });
 
