@@ -36,7 +36,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
-
+aoo.get("/", (req, res) => {
+  res.send("API is running...");
+});
 server.listen(PORT, (req, res) => {
   console.log("Server is runing at PORT: " + PORT);
   EstalishConnectionToDB(process.env.MONGO_URI);
